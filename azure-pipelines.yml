@@ -1,1 +1,86 @@
+trigger: none
+pool: ankit-pool-19oct2026
+stages:
+  - stage: terraforminitandvalidation
+    displayName: terraform init and validation
+    jobs:
+      - job: terraforminitandvalidation
+        displayName: terraform init and validation 
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'ankit-serviceconn-19oct2026'
+            backendAzureRmOverrideSubscriptionID: '143b8f1a-3967-4a7b-bafd-2e157e1af368'
+            backendAzureRmResourceGroupName: 'ankit-rg-19oct'
+            backendAzureRmStorageAccountName: 'ankitstorage19oct'
+            backendAzureRmContainerName: 'ankit-container-19oct'
+            backendAzureRmKey: 'ankit.tfstate'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
 
+  - stage: terraforminitandplan
+    displayName: terraform init and plan
+    dependsOn: terraforminitandvalidation
+    jobs:
+      - job: terraforminitandplan
+        displayName: terraform init and plan
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'ankit-serviceconn-19oct2026'
+            backendAzureRmOverrideSubscriptionID: '143b8f1a-3967-4a7b-bafd-2e157e1af368'
+            backendAzureRmResourceGroupName: 'ankit-rg-19oct'
+            backendAzureRmStorageAccountName: 'ankitstorage19oct'
+            backendAzureRmContainerName: 'ankit-container-19oct'
+            backendAzureRmKey: 'ankit.tfstate'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            environmentServiceNameAzureRM: 'ankit-serviceconn-19oct2026'
+            environmentAzureRmOverrideSubscriptionID: '143b8f1a-3967-4a7b-bafd-2e157e1af368'
+
+  - stage: manualapproval
+    displayName: manual approval
+    dependsOn: terraforminitandplan
+    jobs:
+      - job: manualapproval
+        displayName: manual approval
+        pool:server
+        steps:
+        - task: ManualValidation@1
+          inputs:
+            notifyUsers: 'agupta163716@gmail.com'
+            approvers: 'agupta163716@gmail.com'
+            instructions: 'pls approve'
+
+  - stage: terraforminitandapply
+      displayName:terraform init and apply
+      dependsOn:manualapproval
+      jobs:
+       - job:terraforminitandapply
+        displayName: terraform init and apply
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'ankit-serviceconn-19oct2026'
+            backendAzureRmOverrideSubscriptionID: '143b8f1a-3967-4a7b-bafd-2e157e1af368'
+            backendAzureRmResourceGroupName: 'ankit-rg-19oct'
+            backendAzureRmStorageAccountName: 'ankitstorage19oct'
+            backendAzureRmContainerName: 'ankit-container-19oct'
+            backendAzureRmKey: 'ankit.tfstate'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            commandOptions: '-auto-approve'
+            environmentServiceNameAzureRM: 'ankit-serviceconn-19oct2026'
+            environmentAzureRmOverrideSubscriptionID: '143b8f1a-3967-4a7b-bafd-2e157e1af368'
