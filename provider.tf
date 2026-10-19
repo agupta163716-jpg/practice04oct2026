@@ -7,10 +7,10 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "ramujia"
-    storage_account_name = "ramukigangaji786a"
-    container_name       = "ramramjia"
-    key                  = "terraform.tfstate"
+    resource_group_name  = "ankit-rg-19oct"
+    storage_account_name = "ankitstorage19oct"
+    container_name       = "ankit-container-19oct"
+    key                  = "ankit.tfstate"
     use_azuread_auth     = true
   }
 }
